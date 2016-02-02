@@ -18,7 +18,7 @@
                         <button name="killall" type="object" string="Killall" groups="runbot.group_runbot_admin"/>
                     </div>
                     <group string="Params">
-                        <field name="auto"/>
+                        <field name="mode"/>
                         <field name="nginx"/>
                         <field name="duplicate_id"/>
                         <field name="dependency_ids" widget="many2many_tags"/>
@@ -26,6 +26,7 @@
                         <field name="modules_auto"/>
                         <field name="token"/>
                         <field name="group_ids" widget="many2many_tags"/>
+                        <field name="hook_time" readonly="1"/>
                     </group>
                 </sheet>
             </form>
@@ -36,7 +37,7 @@
         <field name="arch" type="xml">
             <tree string="repos">
                 <field name="name"/>
-                <field name="auto"/>
+                <field name="mode"/>
             </tree>
         </field>
     </record>
@@ -238,7 +239,7 @@
         <xpath expr="//t[@t-foreach=&quot;website.menu_id.child_id&quot;][@t-as=&quot;submenu&quot;]" position="replace">
             <t t-if="repos" >
                  <t t-foreach="repos[:5]" t-as="re">
-                     <li><a t-attf-href="/runbot/repo/{{slug(re)}}"><i class='fa fa-github' /> <t t-esc="re.name.split(':')[1]"/></a></li>
+                     <li><a t-attf-href="/runbot/repo/{{slug(re)}}?search={{request.params.get('search', '')}}"><i class='fa fa-github' /> <t t-esc="re.name.split(':')[1]"/></a></li>
                  </t>
             </t>
         </xpath>
@@ -259,6 +260,11 @@
         <t t-if="bu['result']=='warn'"><i class="text-warning fa fa-warning"/><small t-if="not hide_time"> age <t t-esc="bu['job_age']"/> time <t t-esc="bu['job_time']"/></small></t>
         <t t-if="bu['result']=='skipped'"><i class="text-danger fa fa-ban"/> skipped</t>
         <t t-if="bu['result']=='killed'"><i class="text-danger fa fa-times"/> killed</t>
+
+        <t t-if="bu['server_match'] in ('default', 'fuzzy')">
+            <i class="text-warning fa fa-question-circle fa-fw"
+               title="Server branch cannot be determined exactly. Please use naming convention '9.0-my-branch' to build with '9.0' server branch."/>
+        </t>
     </template>
 
     <template id="runbot.build_button">
